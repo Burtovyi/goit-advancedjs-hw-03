@@ -1,16 +1,28 @@
 import { fetchBreeds, fetchCatByBreed } from './сomponents/cat-api';
+import iziToast from 'izitoast';
 
 const refs = {
   select: document.querySelector('.breed-select'),
   cat_info: document.querySelector('.cat-info'),
+  loader: document.querySelector('.loader'),
+  optionPlug: document.querySelector('.plug'),
 };
+
+refs.loader.classList.add('loader-hidden');
 
 fetchBreeds()
   .then(data => {
-    refs.select.insertAdjacentHTML('afterbegin', createOption(data.data));
+    toggleLoader(true);
+    refs.select.insertAdjacentHTML('beforeend', createOption(data.data));
   })
   .catch(function (error) {
-    console.log(error);
+    iziToast.error({
+      title: 'Error',
+      message: `${error}`,
+    });
+  })
+  .finally(() => {
+    toggleLoader(false);
   });
 
 function createOption(arr) {
@@ -22,46 +34,39 @@ function createOption(arr) {
     .join('');
 }
 
-// console.log(fetchCatByBreed);
-
 refs.select.addEventListener('change', e => {
-  fetchCatByBreed(e.currentTarget.value).then(data => {
-    const img = data.data.url;
-    const nameCat = data.data.breeds[0].name;
-    const description = data.data.breeds[0].description;
-    const temperament = data.data.breeds[0].temperament;
+  toggleLoader(true);
+  refs.optionPlug.disabled = true;
+  fetchCatByBreed(e.currentTarget.value)
+    .then(data => {
+      const img = data.data.url;
+      const nameCat = data.data.breeds[0].name;
+      const description = data.data.breeds[0].description;
+      const temperament = data.data.breeds[0].temperament;
 
-    refs.cat_info.innerHTML = `<img src="${img}" alt="${nameCat}" />
-    <h1>${nameCat}</h1>
-    <h2>${description}</h2>
-    <h2>${temperament}</h2>`;
-  });
+      refs.cat_info.innerHTML = `<img src="${img}" alt="${nameCat}" />
+      <div class="cat_characteristic">
+        <h1>${nameCat}</h1>
+        <p>${description}</p>
+        <p><b>Temperament:</b>${temperament}</p>
+      </div>
+`;
+    })
+    .catch(function (error) {
+      iziToast.error({
+        title: 'Error',
+        message: `${error}`,
+      });
+    })
+    .finally(() => {
+      toggleLoader(false);
+    });
 });
 
-// event => {
-//   return event.currentTarget.value;
-// };
-// console.log(refs.select.currentTarget.value);
-// console.log(refs.select);
-
-// function dataSelect() {
-//   fetch(`${URL_BREEDS}?api_key=${API_KEY}`)
-//     .then(response => {
-//       if (!response.ok) {
-//         throw new Error(response.status);
-//       }
-//       return response.json();
-//     })
-//     .then(data => {
-//       return data
-//         .map(optionMarcup => {
-//           `<option value="${optionMarcup.id}">${optionMarcup.name}</option>`;
-//         })
-//         .join('');
-//     })
-//     .catch(error => {
-//       console.log(error);
-//     });
-// }
-
-// refs.select.insertAdjacentHTML('beforeend', dataSelect);
+function toggleLoader(isVisible) {
+  if (isVisible) {
+    refs.loader.classList.remove('loader-hidden');
+  } else {
+    refs.loader.classList.add('loader-hidden');
+  }
+}

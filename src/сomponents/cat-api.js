@@ -13,5 +13,3 @@ export function fetchBreeds() {
 export function fetchCatByBreed(breedId) {
   return axios.get(`${URL_BREEDS}${END_POINT_ID}${breedId}`);
 }
-
-// https://api.thecatapi.com/v1/images/0XYvRd7oD
