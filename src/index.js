@@ -14,11 +14,13 @@ fetchBreeds()
   .then(data => {
     toggleLoader(true);
     refs.select.insertAdjacentHTML('beforeend', createOption(data.data));
+    refs.select.classList.remove('loader-hidden');
   })
   .catch(function (error) {
+    console.log(error);
     iziToast.error({
       title: 'Error',
-      message: `${error}`,
+      message: 'Servi is temporarily out of service.',
     });
   })
   .finally(() => {
@@ -53,9 +55,11 @@ refs.select.addEventListener('change', e => {
 `;
     })
     .catch(function (error) {
+      console.log(error);
+      refs.cat_info.innerHTML = '';
       iziToast.error({
         title: 'Error',
-        message: `${error}`,
+        message: 'Servi is temporarily out of service.',
       });
     })
     .finally(() => {
