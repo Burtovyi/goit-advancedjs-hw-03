@@ -8,13 +8,11 @@ const refs = {
   optionPlug: document.querySelector('.plug'),
 };
 
-refs.loader.classList.add('loader-hidden');
-
 fetchBreeds()
   .then(data => {
     toggleLoader(true);
     refs.select.insertAdjacentHTML('beforeend', createOption(data.data));
-    refs.select.classList.remove('loader-hidden');
+    refs.select.style.display = 'block';
   })
   .catch(function (error) {
     console.log(error);
@@ -29,10 +27,7 @@ fetchBreeds()
 
 function createOption(arr) {
   return arr
-    .map(
-      ({ reference_image_id, name }) =>
-        `<option value="${reference_image_id}">${name}</option>`
-    )
+    .map(({ id, name }) => `<option value="${id}">${name}</option>`)
     .join('');
 }
 
@@ -41,10 +36,10 @@ refs.select.addEventListener('change', e => {
   refs.optionPlug.disabled = true;
   fetchCatByBreed(e.currentTarget.value)
     .then(data => {
-      const img = data.data.url;
-      const nameCat = data.data.breeds[0].name;
-      const description = data.data.breeds[0].description;
-      const temperament = data.data.breeds[0].temperament;
+      const img = data.data[0].url;
+      const nameCat = data.data[0].breeds[0].name;
+      const description = data.data[0].breeds[0].description;
+      const temperament = data.data[0].breeds[0].temperament;
 
       refs.cat_info.innerHTML = `<img src="${img}" alt="${nameCat}" />
       <div class="cat_characteristic">
@@ -55,11 +50,10 @@ refs.select.addEventListener('change', e => {
 `;
     })
     .catch(function (error) {
-      console.log(error);
       refs.cat_info.innerHTML = '';
       iziToast.error({
         title: 'Error',
-        message: 'Servi is temporarily out of service.',
+        message: 'Oops! Something went wrong! Try reloading the page!',
       });
     })
     .finally(() => {
